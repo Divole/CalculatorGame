@@ -13,7 +13,7 @@ import static org.junit.Assert.assertEquals;
  * To change this template use File | Settings | File Templates.
  */
 public class CalcServerTest {
-    private CalcServer calcServer;
+    public CalcServer calcServer;
     @Before
     public void setUp() throws Exception {
            calcServer = new CalcServer();

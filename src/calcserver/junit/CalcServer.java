@@ -1,5 +1,6 @@
 package calcserver.junit;
 
+
 public class CalcServer {
 
     public static int compareValues(int userGuess, int correctValue){
