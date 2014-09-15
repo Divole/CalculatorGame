@@ -1,4 +1,4 @@
-package calcapp.junit;
+package calcapp;
 
 import javax.swing.*;
 import java.awt.*;
