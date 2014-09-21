@@ -9,6 +9,7 @@ import java.awt.event.WindowEvent;
 
 public class CalcClient {
     private static CalcClient calcClient;
+    private static CalcConnector calcConnector;
     private JPanel view1;
     private JPanel questionerScreen;
     private JPanel questioneeScreen;
@@ -24,8 +25,15 @@ public class CalcClient {
 
     public static void main(String[] args) {
         calcClient = new CalcClient();
-
+        calcConnector = new CalcConnector(calcClient);
+        calcConnector.connect(9999, "Localhost");
+        new Thread(calcConnector).start();
+        System.out.println("connected to server");
     }
+    public CalcConnector getConnector(){
+        return  calcConnector;
+    }
+
     private void startApp(){
         frame =  new JFrame("Calculator Game");
         frame.setSize(300, 400);
@@ -41,63 +49,45 @@ public class CalcClient {
         nameField = new JTextField("");
         nameField.setColumns(15);
         submitNameButton = new JButton("Submit Name");
+
         submitNameButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                String user = getName();
-                frame.remove(view1);
-                if (getRole() == 1){
-                    QuestionerUI qUI = new QuestionerUI();
-                    questionerScreen = qUI.displayQeustionersScreen(user);
-                    frame.add(questionerScreen);
-                }else if(getRole() == 2){
-                    QuestioneeUI qeustioneeUI = new QuestioneeUI();
-                    questioneeScreen = qeustioneeUI.displayQeustioneeScreen(user);
-                    frame.add(questioneeScreen);
-
-                }
-                frame.revalidate();
+                final String user = getName();
+                submitNameButton.setEnabled(false);
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        calcConnector.logIn(user);
+                        displayScreen(user, calcConnector);
+                    }
+                });
             }
         });
-
         view1.add(nameField);
         view1.add(submitNameButton);
-        //--------------------------------------------------------
-        JPanel rolePanel = new JPanel(new FlowLayout());
-        JRadioButton questioner = new JRadioButton("Questioner", false);
-        questioner.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setRole(1);
-                System.out.println("Role is set to"+getRole());
-            }
-        });
-        JRadioButton questionee = new JRadioButton("Questionee", false);
-        questionee.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                setRole(2);
-                System.out.println("Role is set to"+getRole());
-            }
-        });
-        rolePanel.add(questioner);
-        rolePanel.add(questionee);
-        view1.add(rolePanel);
-        //--------------------------------------------------------
         frame.setVisible(true);
 
     }
     private String getName(){
         String name;
         name = nameField.getText();
-        System.out.println(name);
         return name;
     }
-    private void setRole(int role){
-        this.role = role;
-    }
-    private int getRole(){
-        return role;
+
+    public void displayScreen(String user, CalcConnector calcConnector){
+        System.out.println("display screen");
+        if (CalcClient.calcConnector.getRole() == 1){
+            QuestionerUI qUI = new QuestionerUI(calcConnector);
+            questionerScreen = qUI.displayQeustionersScreen(user);
+            frame.add(questionerScreen);
+        }else if(CalcClient.calcConnector.getRole() == 2){
+            QuestioneeUI qeustioneeUI = new QuestioneeUI(calcConnector);
+            questioneeScreen = qeustioneeUI.displayQeustioneeScreen(user);
+            frame.add(questioneeScreen);
+        }
+        frame.remove(view1);
+        frame.revalidate();
     }
 
 

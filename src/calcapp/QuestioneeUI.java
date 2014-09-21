@@ -16,9 +16,15 @@ import java.awt.event.KeyEvent;
  */
 public class QuestioneeUI {
     private JPanel view3;
-    private JTextField answer;
+    private JTextField answer_textField;
+    private CalcConnector calcConnector;
 
-    public QuestioneeUI() {
+    public QuestioneeUI(CalcConnector calcConnector) {
+        this.calcConnector = calcConnector;
+    }
+
+    private String getAnswer(){
+        return answer_textField.getText();
     }
 
     public JPanel displayQeustioneeScreen(String user){
@@ -27,8 +33,8 @@ public class QuestioneeUI {
         view3.setLayout(new BoxLayout(view3, BoxLayout.Y_AXIS));
         JLabel userName = new JLabel(user);
         JPanel actionPanel = new JPanel();
-        answer = new JTextField("");
-        answer.addKeyListener(new KeyAdapter() {
+        answer_textField = new JTextField("");
+        answer_textField.addKeyListener(new KeyAdapter() {
             public void keyTyped(KeyEvent e) {
                 char c = e.getKeyChar();
                 if (((c < '0') || (c > '9')) && (c != KeyEvent.VK_BACK_SPACE)) {
@@ -36,10 +42,10 @@ public class QuestioneeUI {
                 }
             }
         });
-        answer.setColumns(15);
+        answer_textField.setColumns(15);
         view3.add(userName);
         view3.add(Box.createVerticalGlue());
-        actionPanel.add(answer);
+        actionPanel.add(answer_textField);
         view3.add(actionPanel);
         view3.add(createKeyboard());
         view3.add(Box.createVerticalGlue());
@@ -58,8 +64,8 @@ public class QuestioneeUI {
             key.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    String actionString = answer.getText()+ num;
-                    answer.setText(actionString);
+                    String actionString = getAnswer()+ num;
+                    answer_textField.setText(actionString);
                 }
             });
         }
@@ -73,8 +79,12 @@ public class QuestioneeUI {
         submit.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                view3.add(new JLabel("Correct Answer"));
-                view3.revalidate();
+                System.out.println("SUBMIT ANSWER TRIGGERED");
+                String input = getAnswer();
+
+                calcConnector.submitAnswer(getAnswer());
+
+
             }
         });
         wrapper.add(submit);

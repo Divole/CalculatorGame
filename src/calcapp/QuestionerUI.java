@@ -17,8 +17,10 @@ import java.awt.event.KeyEvent;
 public class QuestionerUI {
     private JPanel view2;
     private JTextField action;
+    private CalcConnector calcConnector;
 
-    public QuestionerUI() {
+    public QuestionerUI(CalcConnector calcConnector) {
+        this.calcConnector = calcConnector;
     }
     public JPanel displayQeustionersScreen(String user){
 
@@ -44,6 +46,10 @@ public class QuestionerUI {
         view2.add(Box.createVerticalGlue());
         view2.add(createActionSubmit());
         return view2;
+    }
+
+    public String getAtcion(){
+        return action.getText();
     }
 
     private JPanel createKeyboard(){
@@ -90,12 +96,23 @@ public class QuestionerUI {
 
     private JPanel createActionSubmit(){
         JPanel wrapper = new JPanel(new FlowLayout());
-        JButton submit = new JButton("Submit Action");
+        final JButton submit = new JButton("Submit Action");
         submit.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                view2.add(new JLabel("1/0"));
-                view2.revalidate();
+
+                String input = getAtcion();
+                String[] numbers = input.split("-|\\+|\\*|\\/");
+                char c = input.charAt(0);
+                if(input.startsWith("+") || input.startsWith("*") || input.startsWith("/")){
+                    JOptionPane.showMessageDialog(new JFrame(), "you should not start your function with an action sign");
+                }else if(numbers.length > 3){
+                    JOptionPane.showMessageDialog(new JFrame(), "You cannot use more that 3 mathematical action signs in your formula");
+                }else{
+                    calcConnector.submitAction(getAtcion());
+                }
+
+
             }
         });
         wrapper.add(submit);
