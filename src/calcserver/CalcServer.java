@@ -9,6 +9,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+
 public class CalcServer {
     private ServerSocket server_socket = null;
     public ArrayList<HashMap<Integer, MyThread>> groups = null;
@@ -17,6 +18,8 @@ public class CalcServer {
     private ArrayList<String> answers = null;
     public int index = 0;
     public int questioner = 0;
+    private boolean isRunning = false;
+    private boolean isBlocked = false;
 
 
     public CalcServer() throws IOException {
@@ -25,25 +28,41 @@ public class CalcServer {
         actions = null;
         answers = new ArrayList<String>();
         server_socket = new ServerSocket(port);
-        runServer(true);
     }
 
-    public void runServer(boolean closed){
-        boolean close = closed ;
+    public ArrayList<HashMap<Integer, MyThread>> getGroups(){
+        return groups;
+    }
+
+    public void runServer(boolean run){
+        isRunning = run;
         try {
-            while (close){
-                System.out.println("_______________________________________________________");
-                System.out.println("...server running...");
-                createConnection();
+            while (isRunning){
+                if(!isBlocked){
+                    System.out.println("_______________________________________________________");
+                    System.out.println("...server running...");
+                    Runnable connectionLaunched = new Runnable() {
+                        @Override
+                        public void run() {
+                            createConnection();
+                        }
+                    };
+                    new Thread(connectionLaunched).start();
+
+                }
                 Thread.sleep(500);
             }
-
-        } catch (InterruptedException e) {
+            server_socket.close();
+        } catch (InterruptedException | IOException e) {
             e.printStackTrace();
         }
     }
+    public void setRunning(boolean running){
+        isRunning = running;
+    }
 
     public void createConnection(){
+        isBlocked = true;
         try {
             System.out.println("_______________________________________________________");
             if (groups.isEmpty()){
@@ -81,6 +100,7 @@ public class CalcServer {
             index++;
             System.out.println("Role is "+p.getRole());
             System.out.println("Group size "+clients.size());
+            isBlocked = false;
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -194,6 +214,7 @@ class MainClass{
     public static void main(String[] args) {
         try {
             server = new CalcServer();
+            server.runServer(true);
         } catch (IOException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         }

@@ -22,9 +22,7 @@ public class CalcConnector implements Runnable, CalcProtocol {
     public CalcConnector(CalcClient calcClient) {
         this.calcClient = calcClient;
     }
-    public static CalcConnector getInstance(){
-        return instance;
-    }
+
 
     public void connect(int port, String ip) {
         try {

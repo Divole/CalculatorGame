@@ -81,7 +81,6 @@ public class QuestioneeUI {
             public void actionPerformed(ActionEvent e) {
                 System.out.println("SUBMIT ANSWER TRIGGERED");
                 String input = getAnswer();
-
                 calcConnector.submitAnswer(getAnswer());
 
 
