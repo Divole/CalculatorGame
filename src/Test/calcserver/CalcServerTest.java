@@ -19,14 +19,6 @@ public class CalcServerTest {
     @Test
     public void serverConnectionTest(){
         Mockito.verifyZeroInteractions(calcServerMock);
-//        Mockito.verify(calcServerMock).createConnection();
-//        int expected = 2;
-//        assertEquals(exzpected, calcServerMock.getGroups().size());
-
     }
-//    @Test
-//    public void groupCreationTest(){
-//
-//    }
-}
 
+}

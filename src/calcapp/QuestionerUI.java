@@ -1,5 +1,8 @@
 package calcapp;
 
+import calcapp.Exceptions.AmountOfSymbolsExceededException;
+import calcapp.Exceptions.StartWithMathematicalSymbolException;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -7,25 +10,17 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 
-/**
- * Created with IntelliJ IDEA.
- * User: Dovile
- * Date: 15-09-14
- * Time: 10:04
- * To change this template use File | Settings | File Templates.
- */
 public class QuestionerUI {
-    private JPanel view2;
     private JTextField action;
-    private CalcConnector calcConnector;
+//    private CalcConnector calcConnector;
 
     public QuestionerUI(CalcConnector calcConnector) {
-        this.calcConnector = calcConnector;
+//        this.calcConnector = calcConnector;
     }
     public JPanel displayQeustionersScreen(String user){
 
-        view2 = new JPanel();
-        view2.setLayout(new BoxLayout(view2,BoxLayout.Y_AXIS));
+        JPanel view2 = new JPanel();
+        view2.setLayout(new BoxLayout(view2, BoxLayout.Y_AXIS));
         JLabel userName = new JLabel(user);
         JPanel actionPanel = new JPanel();
         action = new JTextField("");
@@ -97,27 +92,21 @@ public class QuestionerUI {
     private JPanel createActionSubmit(){
         JPanel wrapper = new JPanel(new FlowLayout());
         final JButton submit = new JButton("Submit Action");
+
+        final ActionValidator av = new ActionValidator();
         submit.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-
                 String input = getAtcion();
-                String[] numbers = input.split("-|\\+|\\*|\\/");
-                char c = input.charAt(0);
-                if(input.startsWith("+") || input.startsWith("*") || input.startsWith("/")){
-                    JOptionPane.showMessageDialog(new JFrame(), "you should not start your function with an action sign");
-                }else if(numbers.length > 3){
-                    JOptionPane.showMessageDialog(new JFrame(), "You cannot use more that 3 mathematical action signs in your formula");
-                }else{
-                    calcConnector.submitAction(getAtcion());
+                try {
+                    av.validateString(input);
+                } catch (StartWithMathematicalSymbolException | AmountOfSymbolsExceededException e1) {
+                    e1.printStackTrace();
                 }
-
-
             }
         });
         wrapper.add(submit);
         return wrapper;
-
     }
 
 
