@@ -12,10 +12,10 @@ import java.awt.event.KeyEvent;
 
 public class QuestionerUI {
     private JTextField action;
-//    private CalcConnector calcConnector;
+    private CalcConnector  calcConnector;
 
     public QuestionerUI(CalcConnector calcConnector) {
-//        this.calcConnector = calcConnector;
+        this.calcConnector = calcConnector;
     }
     public JPanel displayQeustionersScreen(String user){
 

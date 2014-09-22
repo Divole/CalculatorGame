@@ -8,15 +8,13 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 
 public class CalcClient {
-    private static CalcClient calcClient;
-    private static CalcConnector calcConnector;
     private JPanel view1;
     private JPanel questionerScreen;
     private JPanel questioneeScreen;
     private JFrame frame;
     private JTextField nameField;
     private JButton submitNameButton;
-    private int role;
+    private static CalcConnector calcConnector;
 
 
     public CalcClient(){
@@ -24,14 +22,12 @@ public class CalcClient {
     }
 
     public static void main(String[] args) {
-        calcClient = new CalcClient();
-        calcConnector = new CalcConnector(calcClient);
-        calcConnector.connect(9999, "Localhost");
-        new Thread(calcConnector).start();
+        calcConnector = new CalcConnector();
+        calcConnector.connect();
         System.out.println("connected to server");
     }
     public CalcConnector getConnector(){
-        return  calcConnector;
+        return calcConnector;
     }
 
     private void startApp(){
@@ -53,17 +49,17 @@ public class CalcClient {
         submitNameButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                final String user = getName();
-                submitNameButton.setEnabled(false);
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        calcConnector.logIn(user);
-                        displayScreen(user, calcConnector);
-                    }
-                });
+            final String user = getName();
+            submitNameButton.setEnabled(false);
+            try {
+                calcConnector.logIn(user);
+                displayScreen(user);
+            } catch (InterruptedException e1) {
+                e1.printStackTrace();
+            }
             }
         });
+
         view1.add(nameField);
         view1.add(submitNameButton);
         frame.setVisible(true);
@@ -75,20 +71,22 @@ public class CalcClient {
         return name;
     }
 
-    public void displayScreen(String user, CalcConnector calcConnector){
+    public static CalcConnector getCalcConnector() {
+        return calcConnector;
+    }
+
+    public void displayScreen(String user){
         System.out.println("display screen");
-        if (CalcClient.calcConnector.getRole() == 1){
-            QuestionerUI qUI = new QuestionerUI(calcConnector);
+        if (getCalcConnector().getClientRunnable().getRole() == 1){
+            QuestionerUI qUI = new QuestionerUI(getCalcConnector());
             questionerScreen = qUI.displayQeustionersScreen(user);
             frame.add(questionerScreen);
-        }else if(CalcClient.calcConnector.getRole() == 2){
-            QuestioneeUI qeustioneeUI = new QuestioneeUI(calcConnector);
+        }else if(getCalcConnector().getClientRunnable().getRole() == 2){
+            QuestioneeUI qeustioneeUI = new QuestioneeUI(getCalcConnector());
             questioneeScreen = qeustioneeUI.displayQeustioneeScreen(user);
             frame.add(questioneeScreen);
         }
         frame.remove(view1);
         frame.revalidate();
     }
-
-
 }

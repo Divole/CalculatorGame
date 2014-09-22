@@ -8,92 +8,81 @@ import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
-public class CalcConnector implements Runnable, CalcProtocol {
-    private static CalcConnector instance = new CalcConnector();
+public class CalcConnector{
     Socket client;
     ObjectInputStream in;
     ObjectOutputStream out;
-    private CalcClient calcClient;
-    private int role;
+    ClientRunnable clientRunnable = null;
+    int port = 9999;
+    String ip = "Localhost";
 
     public CalcConnector() {
     }
 
-    public CalcConnector(CalcClient calcClient) {
-        this.calcClient = calcClient;
-    }
-
-
-    public void connect(int port, String ip) {
+    public void connect() {
         try {
             client = new Socket();
             client.connect(new InetSocketAddress(ip, port));
-
             out = new ObjectOutputStream(client.getOutputStream());
             in = new ObjectInputStream(client.getInputStream());
+            clientRunnable = new ClientRunnable(in,out,client);
+            new Thread(clientRunnable).start();
 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
-    @Override
-    public void run() {
-    }
-
-    public void logIn(final String userName){
+    public void logIn(final String user_name) throws InterruptedException {
+        //This method will be called when user click submit user name button
         try {
             out.writeUTF(CalcProtocol.LOGIN);
             out.flush();
-            out.writeUTF(userName);
+            out.writeUTF(user_name);
             out.flush();
+            clientRunnable.setName(user_name);
             String response = in.readUTF();
             if (response.equals(CalcProtocol.ROLE)){
-                this.setRole(Integer.parseInt(in.readUTF()));
+                clientRunnable. setRole(Integer.parseInt(in.readUTF()));
             }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-
     public void submitAction(String action){
+        //This method will be called when user click submit action button
         try {
             out.writeUTF(CalcProtocol.ACTION_CLIENT_SERVER);
             out.flush();
             out.writeUTF(action);
             out.flush();
+            clientRunnable.setSubmitAction(true);
+
         } catch (IOException e) {
             e.printStackTrace();
         }
 
     }
     public void submitAnswer(String answer){
+        //This method will be called when user click submit answer button
         try {
             out.writeUTF(CalcProtocol.ANSWER_CLIENT_SERVER);
-            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!sending to the server");
             out.flush();
             out.writeUTF(answer);
             out.flush();
-            System.out.println("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!sending to the server");
+            clientRunnable.setSubmitAnswer(true);
 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-    private void setRole(int role){
-        System.out.println("set role "+role);
-        this.role = role;
 
+
+    public ClientRunnable getClientRunnable() {
+        return clientRunnable;
     }
-    public  int getRole(){
-        System.out.println("get role "+role);
-        return role;
-    }
-    public void closeConnection(){
-        try {
-            client.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+
+    public void setClientRunnable(ClientRunnable clientRunnable) {
+        this.clientRunnable = clientRunnable;
     }
 }
