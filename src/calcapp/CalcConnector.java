@@ -56,8 +56,7 @@ public class CalcConnector{
             out.flush();
             out.writeUTF(action);
             out.flush();
-            clientRunnable.setSubmitAction(true);
-
+            getClientRunnable().setAction(action);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -70,7 +69,10 @@ public class CalcConnector{
             out.flush();
             out.writeUTF(answer);
             out.flush();
-            clientRunnable.setSubmitAnswer(true);
+            getClientRunnable().setSubmitAnswer(true);
+            getClientRunnable().setAnswer(answer);
+
+            System.out.println("CalcConnector:  ANSWER HAS BEEN SENT"+ getClientRunnable().getAnswer());
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -82,7 +84,5 @@ public class CalcConnector{
         return clientRunnable;
     }
 
-    public void setClientRunnable(ClientRunnable clientRunnable) {
-        this.clientRunnable = clientRunnable;
-    }
+
 }

@@ -1,5 +1,7 @@
 package calcserver;
 
+import bsh.EvalError;
+import bsh.Interpreter;
 import common.CalcProtocol;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -130,6 +132,7 @@ class MyThread implements Runnable, CalcProtocol {
     private boolean loggedIn = false;
     private String action = null;
     private String answer = null;
+    private String result = null;
     ObjectInputStream in;
     ObjectOutputStream out;
 
@@ -161,17 +164,59 @@ class MyThread implements Runnable, CalcProtocol {
                     if(in.readUTF().equals(CalcProtocol.ACTION_CLIENT_SERVER)){
                         action = in.readUTF();
                         sendActionToOthers(action); //this method also triggers the method sendActionToClient() within each specific thread
+                        System.out.println("CalcServer: action has been set for the other client threads");
+                        checkAnswers();
                     }
                 }else if(role==2){
                     synchronized (this){
                          this.wait();
                     }
                     sendActionToClient();
+                    receiveAnswerFromClient();
+//                    calculateResult();
                 }
             }
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException | InterruptedException | EvalError e ) {
             e.printStackTrace();
         }
+    }
+
+    private void checkAnswers(){
+        //TODO: ratio calculation
+        try {
+            int i = 0;
+            Thread.sleep(1000);
+            while (i!=9){
+                for (MyThread cl: clients.values()){
+                    if(cl.getRole() == 2 && cl.getResult() != null){
+                       i++;
+                    }
+                }
+                i = 0;
+                Thread.sleep(500);
+            }
+            int correct = 0;
+            int incorrect = 0;
+            for (MyThread cl: clients.values()){
+                if(cl.getRole() == 2 && cl.getResult().equals(CalcProtocol.CORRECT_RESULT)){
+                    System.out.println("CalcServer: ANSWER CHECK CORRECT");
+                    correct++;
+                }else if(cl.getRole() == 2 && cl.getResult().equals(CalcProtocol.INCORRECT_RESULT)){
+
+                     incorrect++;
+                }
+            }
+            String ratio = correct+"/"+incorrect;
+            out.writeUTF(CalcProtocol.RATIO);
+            out.flush();
+            out.writeUTF(ratio);
+            out.flush();
+
+        } catch (InterruptedException | IOException e) {
+            e.printStackTrace();
+        }
+
+
     }
 
 
@@ -193,6 +238,37 @@ class MyThread implements Runnable, CalcProtocol {
         out.writeUTF(getAction());
         out.flush();
     }
+    private void receiveAnswerFromClient() throws IOException, EvalError {
+        if (in.readUTF().equals(CalcProtocol.ANSWER_CLIENT_SERVER)){
+            String answer = in.readUTF();
+            System.out.println("CalcServer: SERVER RECEIVED ANSWER: "+ answer);
+            setAnswer(answer);
+            calculateResult();
+            System.out.println("CalcServer: Result calculated");
+        }
+    }
+
+    private void calculateResult() throws EvalError {
+        String action = getAction();
+        String answer = getAnswer();
+        Interpreter interpreter = new Interpreter();
+        interpreter.eval("result = "+action);
+        String result = ""+interpreter.get("result");
+        setResult(result);
+        System.out.println("CalcServer: RESULT - "+getResult());
+        try {
+            if(getResult().equals(answer)){
+                out.writeUTF(CalcProtocol.CORRECT_RESULT);
+                out.flush();
+
+            }else{
+                out.writeUTF(CalcProtocol.INCORRECT_RESULT);
+                out.flush();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public void setAction(String string){
         action = string;
@@ -212,6 +288,15 @@ class MyThread implements Runnable, CalcProtocol {
     public int getRole(){
         return role;
     }
+
+    String getResult() {
+        return result;
+    }
+
+    void setResult(String result) {
+        this.result = result;
+    }
+
     public void setName(String name){
         this.clientName =  name;
     }

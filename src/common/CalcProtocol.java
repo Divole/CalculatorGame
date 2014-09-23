@@ -14,5 +14,7 @@ public interface CalcProtocol {
     public static String ACTION_CLIENT_SERVER = "action submit";
     public static String ACTION_SERVER_CLIENT = "sending action";
     public static String ANSWER_CLIENT_SERVER = "answer submit";
-    public static String ANSWER_SERVER_CLIENT = "sending answer";
+    public static String INCORRECT_RESULT= "wrong";
+    public static String CORRECT_RESULT = "correct";
+    public static String RATIO = "ratio is coming";
 }

@@ -38,18 +38,27 @@ public class ClientRunnable implements Runnable, CalcProtocol {
                 while (!getSubmitAction()){
                     Thread.sleep(500);
                 }
-                //TODO: implement receiving answer here
-                    // do not forget to setSubmitAction to false again
+                //TODO: implement receiving ratio
+                if (in.readUTF().equals(CalcProtocol.RATIO)){
+                    System.out.println("ClientRunnable: RATIO is coming");
+                    setRatio(in.readUTF());
+                }
 
             }else if (getRole()==2){
-                 String response = in.readUTF();
+                String response = in.readUTF();
                 if (response.equals(CalcProtocol.ACTION_SERVER_CLIENT)){
                     String ac = in.readUTF();
                     setAction(ac);
-                    System.out.println(getName()+": GET ACTION RETURNS - "+ getAction());
-                    //TODO: wait until user submits the answer
-                    //and read the result
-                    //and don't forget to setSubmitAction to false again
+//                    while (!submitAnswer){
+//                        Thread.sleep(500);
+//                    }
+                    String result = in.readUTF();
+                    if (result.equals(CalcProtocol.CORRECT_RESULT)){
+                        setResult(CalcProtocol.CORRECT_RESULT);
+                    }else if(result.equals(CalcProtocol.INCORRECT_RESULT)){
+                        setResult(CalcProtocol.INCORRECT_RESULT);
+                    }
+                    System.out.println("ClientRunnable: result received - "+result);
                 }
             }
         } catch (IOException | InterruptedException e) {
@@ -85,7 +94,25 @@ public class ClientRunnable implements Runnable, CalcProtocol {
     public String getAnswer() {
         return answer;
     }
+    public void setAnswer(String answer) {
+        this.answer = answer;
+    }
 
+    public String getResult() {
+        return result;
+    }
+
+    public void setResult(String result) {
+        this.result = result;
+    }
+
+    public String getRatio() {
+        return ratio;
+    }
+
+    public void setRatio(String ratio) {
+        this.ratio = ratio;
+    }
 
     public Boolean getSubmitAction() {
         return submitAction;
@@ -110,4 +137,6 @@ public class ClientRunnable implements Runnable, CalcProtocol {
             e.printStackTrace();
         }
     }
+
+
 }

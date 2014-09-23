@@ -2,6 +2,7 @@ package calcserver;
 
 import calcapp.ClientRunnable;
 import calcapp.CalcConnector;
+import common.CalcProtocol;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -63,11 +64,13 @@ public class CalcServerTest {
         System.out.println(Arrays.toString(roles));
         assertArrayEquals(expected_roles, roles);
     }
+
     @Test
     public void nameAssignmentTest() throws IOException, InterruptedException {
         //test if the names of the client are being saved
         assertArrayEquals(names,result_names);
     }
+
     @Test
     public void serverReceiveAction() throws IOException, InterruptedException {
         // test if each thread on the server receives action
@@ -79,19 +82,19 @@ public class CalcServerTest {
             assertEquals(expected_action, cl.getAction());
         }
     }
+
     @Test
     public void serverConnectionTest6() throws IOException, InterruptedException {
         // test if clients receives the action from the server
         CalcConnector questioner = clients[0];
         String expected_action = "23-4+567";
         questioner.submitAction(expected_action);
-        Thread.sleep(1000);
         ArrayList<String> result = new ArrayList<>();
-        for (int i = 1; i <= 10; i++){
+        for(int i = 1; i <= 10; i++){
             CalcConnector cc = clients[i];
             assertEquals( expected_roles[i], (Integer)cc.getClientRunnable().getRole());
 
-            if (cc.getClientRunnable().getRole()!= 1){
+            if(cc.getClientRunnable().getRole()!= 1){
                 System.out.println( "TEST ACTION "+ cc.getClientRunnable().getAction()+", Name: "+ cc.getClientRunnable().getName());
                 assertEquals(expected_action, cc.getClientRunnable().getAction());
                 result.add(cc.getClientRunnable().getAction());
@@ -100,6 +103,32 @@ public class CalcServerTest {
         assertEquals(9, result.size());
     }
 
+    @Test
+    public void submitAnswerTest() throws InterruptedException {
+        CalcConnector questioner = clients[0];
+        CalcConnector questionee = clients[1];
+        questioner.submitAction("23+3-5");
+        questionee.submitAnswer("21");
+        Thread.sleep(1000);
+        MyThread thread = groups.get(0).get(1);
+        assertEquals(questionee.getClientRunnable().getName(), thread.getUserName());
+        String result = thread.getAnswer();
+        assertEquals("21", result);
+        assertEquals(CalcProtocol.CORRECT_RESULT, questionee.getClientRunnable().getResult());
+        String[] answers =  new String[]{"22","21","23","21","21","21","21","21"};
+        int num = 0;
+        for(int i = 2; i<=9; i++){
+            clients[i].submitAction(answers[num]);
+            Thread.sleep(500);
+            System.out.println("TEST: "+clients[i].getClientRunnable().getAction());
+            num++;
+        }
+//        while (questioner.getClientRunnable().getRatio() == null){
+//            Thread.sleep(500);
+//        }
+//        assertEquals("7/2", questioner.getClientRunnable().getRatio());
+
+    }
 
     @After
     public void tearDown() throws Exception {
