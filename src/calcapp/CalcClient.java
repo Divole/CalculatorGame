@@ -1,5 +1,7 @@
 package calcapp;
 
+import calcapp.Exceptions.ActionChangeException;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -15,22 +17,28 @@ public class CalcClient {
     private JTextField nameField;
     private JButton submitNameButton;
     private static CalcConnector calcConnector;
-
+    QuestionerUI qUI;
+    QuestioneeUI qeustioneeUI;
 
     public CalcClient(){
         startApp();
     }
 
     public static void main(String[] args) {
-        calcConnector = new CalcConnector();
-        calcConnector.connect();
-        System.out.println("connected to server");
+        new CalcClient();
+
     }
     public CalcConnector getConnector(){
         return calcConnector;
     }
 
     private void startApp(){
+
+
+            calcConnector = new CalcConnector();
+            calcConnector.connect();
+
+        System.out.println("connected to server");
         frame =  new JFrame("Calculator Game");
         frame.setSize(300, 400);
         frame.addWindowListener(new WindowAdapter() {
@@ -77,16 +85,34 @@ public class CalcClient {
 
     public void displayScreen(String user){
         System.out.println("display screen");
+        frame.remove(view1);
         if (getCalcConnector().getClientRunnable().getRole() == 1){
-            QuestionerUI qUI = new QuestionerUI(getCalcConnector());
+            qUI = new QuestionerUI(getCalcConnector());
             questionerScreen = qUI.displayQeustionersScreen(user);
             frame.add(questionerScreen);
+            frame.revalidate();
         }else if(getCalcConnector().getClientRunnable().getRole() == 2){
-            QuestioneeUI qeustioneeUI = new QuestioneeUI(getCalcConnector());
-            questioneeScreen = qeustioneeUI.displayQeustioneeScreen(user);
+            qeustioneeUI = new QuestioneeUI(getCalcConnector());
+            try {
+                questioneeScreen = qeustioneeUI.displayQeustioneeScreen(user);
+            } catch (ActionChangeException e) {
+                qeustioneeUI.resetAction();
+            }
             frame.add(questioneeScreen);
+            frame.revalidate();
+            System.out.println("display screen");
         }
-        frame.remove(view1);
-        frame.revalidate();
+
+
+
     }
+
+    public QuestionerUI getqUI() {
+        return qUI;
+    }
+
+    public QuestioneeUI getQeustioneeUI() {
+        return qeustioneeUI;
+    }
+
 }

@@ -1,5 +1,6 @@
 package calcapp;
 
+import calcapp.Exceptions.ActionChangeException;
 import common.CalcProtocol;
 
 import java.io.IOException;
@@ -16,10 +17,10 @@ public class CalcConnector{
     int port = 9999;
     String ip = "Localhost";
 
-    public CalcConnector() {
+    public CalcConnector(){
     }
 
-    public void connect() {
+    public void connect(){
         try {
             client = new Socket();
             client.connect(new InetSocketAddress(ip, port));

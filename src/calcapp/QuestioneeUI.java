@@ -1,5 +1,7 @@
 package calcapp;
 
+import calcapp.Exceptions.ActionChangeException;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -18,21 +20,24 @@ public class QuestioneeUI {
     private JPanel view3;
     private JTextField answer_textField;
     private CalcConnector calcConnector;
+    private JLabel action;
 
     public QuestioneeUI(CalcConnector calcConnector) {
         this.calcConnector = calcConnector;
+        action = new JLabel("action here");
     }
 
     private String getAnswer(){
         return answer_textField.getText();
     }
 
-    public JPanel displayQeustioneeScreen(String user){
-
+    public JPanel displayQeustioneeScreen(String user) throws ActionChangeException{
         view3 = new JPanel();
         view3.setLayout(new BoxLayout(view3, BoxLayout.Y_AXIS));
         JLabel userName = new JLabel(user);
         JPanel actionPanel = new JPanel();
+        actionPanel.setLayout(new GridLayout(2,1));
+        actionPanel.setBorder(BorderFactory.createLineBorder(Color.black));
         answer_textField = new JTextField("");
         answer_textField.addKeyListener(new KeyAdapter() {
             public void keyTyped(KeyEvent e) {
@@ -46,6 +51,8 @@ public class QuestioneeUI {
         view3.add(userName);
         view3.add(Box.createVerticalGlue());
         actionPanel.add(answer_textField);
+        actionPanel.add(action);
+
         view3.add(actionPanel);
         view3.add(createKeyboard());
         view3.add(Box.createVerticalGlue());
@@ -90,4 +97,15 @@ public class QuestioneeUI {
         return wrapper;
 
     }
+    public void resetAction(){
+        String text = calcConnector.getClientRunnable().getAction();
+        action.setText(text);
+        view3.revalidate();
+    }
+
+    public JLabel getActionLabel() {
+        return action;
+    }
+
+
 }

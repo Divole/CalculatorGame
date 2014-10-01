@@ -1,7 +1,7 @@
 package calcapp;
 
+import calcapp.Exceptions.ActionChangeException;
 import common.CalcProtocol;
-
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -22,18 +22,18 @@ public class ClientRunnable implements Runnable, CalcProtocol {
     private Boolean submitAction = false;//indicates if the ACTION has been submitted to the server or not
     private Boolean submitAnswer = false;//indicates if the ANSWER has been submitted to the server or not
 
-    public ClientRunnable(ObjectInputStream in, ObjectOutputStream out, Socket client) {
+    public ClientRunnable(ObjectInputStream in, ObjectOutputStream out, Socket client){
         this.client = client;
         this.in = in;
         this.out = out;
     }
     @Override
-    public void run() {
+    public void run(){
         try {
             while (role == 0){
                 Thread.sleep(500);
-
             }
+
             if (getRole()==1){
                 while (!getSubmitAction()){
                     Thread.sleep(500);
@@ -49,6 +49,9 @@ public class ClientRunnable implements Runnable, CalcProtocol {
                 if (response.equals(CalcProtocol.ACTION_SERVER_CLIENT)){
                     String ac = in.readUTF();
                     setAction(ac);
+
+//                    throw new ActionChangeException();
+
 //                    while (!submitAnswer){
 //                        Thread.sleep(500);
 //                    }

@@ -52,8 +52,8 @@ public class CalcServer {
         try {
             while (isRunning){
                 if(!isBlocked){
-                    System.out.println("_______________________________________________________");
-                    System.out.println("...server running...");
+//                    System.out.println("_______________________________________________________");
+//                    System.out.println("...server running...");
                     Runnable connectionLaunched = new Runnable() {
                         @Override
                         public void run() {
@@ -79,25 +79,25 @@ public class CalcServer {
     public void createConnection(){
         isBlocked = true;
         try {
-            System.out.println("_______________________________________________________");
+//            System.out.println("_______________________________________________________");
             if (groups.isEmpty()){
                 clients = new HashMap<Integer, MyThread>();
                 groups.add(clients);
-                System.out.println("NEW GROUP");
+//                System.out.println("NEW GROUP");
             }else{
                 boolean size = false;
 
                 for(HashMap<Integer, MyThread> g: groups){
 
                     if(g.size() < 10){
-                        System.out.println("EXISTING GROUP");
-                        clients = g;
+//                        System.out.println("EXISTING GROUP");
+//                        clients = g;
                         size = true;
                         break;
                     }
                 }
                 if (!size){
-                    System.out.println("GROUP IS FULL, NEW GROUP CREATED");
+//                    System.out.println("GROUP IS FULL, NEW GROUP CREATED");
                     index = 0;
                     clients = new HashMap<Integer, MyThread>();
                     groups.add(clients);
@@ -199,7 +199,7 @@ class MyThread implements Runnable, CalcProtocol {
             int incorrect = 0;
             for (MyThread cl: clients.values()){
                 if(cl.getRole() == 2 && cl.getResult().equals(CalcProtocol.CORRECT_RESULT)){
-                    System.out.println("CalcServer: ANSWER CHECK CORRECT");
+//                    System.out.println("CalcServer: ANSWER CHECK CORRECT");
                     correct++;
                 }else if(cl.getRole() == 2 && cl.getResult().equals(CalcProtocol.INCORRECT_RESULT)){
 
